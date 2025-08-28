@@ -96,7 +96,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-開啟瀏覽器進入 [http://localhost:8000](http://localhost:8000)
+開啟瀏覽器進入 [http://localhost:8000/records](http://localhost:8000/records)
 
 <!-- ## 🔑 第三方登入設定（可選）
 
