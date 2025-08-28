@@ -51,7 +51,7 @@
 ### 1️⃣ 環境安裝
 
 ```bash
-git clone https://github.com/your-username/budget-tracker.git
+git clone https://github.com/Yen-Ting-Chen/track_spending.git
 cd budget-tracker
 
 python -m venv venv
