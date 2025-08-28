@@ -127,9 +127,9 @@ budget_tracker/
 
 ## 🧑‍💻 開發者資訊
 
-作者：`陳彥廷 / tom840321zx`  
+作者：`陳彥廷`  
 E-mail：tom840321zx@gmail.com
 
 ## 📄 License
 
-本專案採用 MIT 授權，歡迎自由使用與修改。
+歡迎自由使用與修改。
