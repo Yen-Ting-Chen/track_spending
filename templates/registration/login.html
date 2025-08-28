@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+  padding: 2rem;
+  margin: 50px auto;
+}
+.login-card .form-control:focus {
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+}
+.login-card .btn-primary {
+  background: #6c63ff;
+  border: none;
+}
+.login-card .btn-primary:hover {
+  background: #5548c8;
+}
+{% endblock %}
+{% block content %}
+
+{% comment %} <form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+<table>
+    <tr>
+    <td>{{ form.username.label_tag }}</td>
+    <td>{{ form.username }}</td>
+    </tr>
+    <tr>
+    <td>{{ form.password.label_tag }}</td>
+    <td>{{ form.password }}</td>
+    </tr>
+</table>
+
+<input type="submit" value="login">
+<input type="hidden" name="next" value="{{ next }}">
+</form> {% endcomment %}
+
+  <br>
+  <div class="login-card">
+    <h3 class="text-center mb-4">登入帳號</h3>
+    <!-- 這裡放你原本的 form -->
+    <form method="post" action="{% url 'login' %}" >
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="id_username" class="form-label">帳號</label>
+        {% render_field form.username class="form-control" placeholder="輸入帳號" %}
+      </div>
+      <div class="mb-3">
+        <label for="id_password" class="form-label">密碼</label>
+        {% render_field form.password class="form-control" placeholder="輸入密碼" %}
+      </div>
+      {% comment %} <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="remember">
+          <label class="form-check-label" for="remember">記住我</label>
+        </div>
+        <a href="#" class="small">忘記密碼？</a>
+      </div> {% endcomment %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn btn-primary w-100">登入</button>
+    </form>
+    {% comment %} <p class="text-center mt-3 mb-0">
+      還沒有帳號？ <a href="#">註冊</a>
+    </p> {% endcomment %}
+  </div>
+{% endblock %}

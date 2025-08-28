@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .custom-table-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    background-color: #ffffff;
+  }
+
+  .custom-table thead {
+    background-color: #f1f5f9;
+  }
+
+  .custom-table th,
+  .custom-table td {
+    vertical-align: middle;
+  }
+
+  .custom-table tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .custom-table th {
+    font-weight: 600;
+    color: #f8f9fa;
+  }
+</style>
+
+<div class="container mt-5">
+  <h2 class="mb-4">記帳紀錄</h2>
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+      <select name="year" class="form-select">
+        {% for y in years %}
+          <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <select name="month" class="form-select">
+        {% for m in months %}
+          <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">查詢</button>
+    </div>
+  </form>
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card summary-card shadow-sm text-white bg-success">
+        <div class="card-body text-center">
+          <h5 class="card-title">總收入</h5>
+          <p class="card-text fs-4">$+{{ total_income|floatformat:0 }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card summary-card shadow-sm text-white bg-danger">
+        <div class="card-body text-center">
+          <h5 class="card-title">總支出</h5>
+          <p class="card-text fs-4">$-{{ total_expense|floatformat:0 }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card summary-card shadow-sm text-white bg-primary">
+        <div class="card-body text-center">
+          <h5 class="card-title">結餘</h5>
+          <p class="card-text fs-4">
+            ${{ balance|floatformat:0 }}
+            {% comment %} {% if balance >= 0 %}
+              ${{ balance|floatformat:0 }}
+            {% else %}
+              -${{ balance|abs|floatformat:0 }}
+            {% endif %} {% endcomment %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% comment %}  {% endcomment %}
+  <div class="custom-table-card mb-5">
+    <table class="table table-hover custom-table mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>日期</th>
+          <th>類型</th>
+          <th>分類</th>
+          <th>項目</th>
+          <th>消費方式</th>
+          <th>金額</th>
+          <th></th>
+          {% comment %} <th>備註</th> {% endcomment %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+        <tr>
+          <td>{{ record.date }}</td>
+          <td>{{ record.get_record_type_display }}</td>
+          <td>{{ record.category }}</td>
+          <td>{{ record.name }}</td>
+          <td>{{ record.get_payment_method_display }}</td>
+          <td class="{% if record.record_type == 'expense' %}text-danger{% else %}text-success{% endif %}">
+            {{ record.amount }}
+          </td>
+          <td>
+            <a href="{% url 'edit_record' record.id %}" class="btn btn-sm btn-outline-primary">編輯</a>
+            <a href="{% url 'delete_record' record.id %}" class="btn btn-sm btn-outline-danger"
+              onclick="return confirm('確定要刪除這筆紀錄？')">刪除</a>
+          </td>
+          {% comment %} <td>{{ record.note }}</td> {% endcomment %}
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">尚無紀錄</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

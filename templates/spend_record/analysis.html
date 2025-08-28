@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+  .chart-card {
+    background-color: #f1f5f9;
+    border: none;
+    height: 100%;
+  }
+  .chart-container {
+    height: 350px;
+  }
+</style>
+
+<div class="container mt-5">
+    <form method="post" class="row mb-4 justify-content-center">
+    {% csrf_token %}
+    <div class="col-md-3">
+        <label class="form-label">起始日期</label>
+        <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">結束日期</label>
+        <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">查詢</button>
+    </div>
+    </form>
+
+  {% comment %} <div class="row mb-4">
+    <div class="col text-center">
+      <h2 class="fw-bold text-primary">年度帳務分析</h2>
+    </div>
+  </div> {% endcomment %}
+
+  <div class="row mb-5">
+    <div class="col-md-4">
+      <div class="card text-white bg-success shadow mb-3">
+        <div class="card-body text-center">
+          <h5 class="card-title">總收入</h5>
+          <p class="card-text fs-3">${{ total_income }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white bg-danger shadow mb-3">
+        <div class="card-body text-center">
+          <h5 class="card-title">總支出</h5>
+          <p class="card-text fs-3">-${{ total_expense }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white bg-primary shadow mb-3">
+        <div class="card-body text-center">
+          <h5 class="card-title">結餘</h5>
+          <p class="card-text fs-3">${{ balance }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 兩張圖表併排 -->
+  <div class="row mb-5">
+    <div class="col-md-6">
+      <div class="card chart-card shadow p-3 text-center">
+          <h5 class="mb-3">各分類支出比例</h5>
+          <div class="chart-container d-flex justify-content-center align-items-center">
+          <canvas id="expensePieChart" ></canvas>
+          </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card chart-card shadow p-3">
+        <h5 class="text-center mb-3">月收入 / 支出比較</h5>
+        <div class="chart-container">
+          <canvas id="monthlyBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 🔘 花費總覽 Tab 選單 -->
+  <ul class="nav nav-tabs mb-3" id="summaryTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="category-tab" data-bs-toggle="tab" data-bs-target="#category" type="button" role="tab">分類花費總覽</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab">消費方式總覽</button>
+    </li>
+  </ul>
+
+  <!-- 🔄 花費總覽 Tab 內容 -->
+  <div class="tab-content" id="summaryTabsContent">
+    <!-- 🔹 分類花費總覽 -->
+    <div class="tab-pane fade show active" id="category" role="tabpanel" aria-labelledby="category-tab">
+      <div class="card shadow">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">分類花費總覽</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>分類</th>
+                <th>總金額</th>
+                <th>細項</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for category, total, items in category_breakdown %}
+              <tr>
+                <td>{{ category }}</td>
+                <td>${{ total }}</td>
+                <td>
+                  <ul class="mb-0">
+                    {% for item in items %}
+                    <li>
+                      <div>
+                        {{ item.name }} - ${{ item.amount }}
+                        <small class="text-muted">({{ item.date }})</small>
+                      </div>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ 消費方式花費總覽 -->
+    <div class="tab-pane fade" id="payment" role="tabpanel" aria-labelledby="payment-tab">
+      <div class="card shadow">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">消費方式總覽</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>消費方式</th>
+                <th>總金額</th>
+                <th>細項</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for method, total, items in payment_breakdown %}
+              <tr>
+                <td>{{ method }}</td>
+                <td>${{ total }}</td>
+                <td>
+                  <ul class="mb-0">
+                    {% for item in items %}
+                    <li>
+                      <div>
+                        {{ item.name }} - ${{ item.amount }}
+                        <small class="text-muted">({{ item.date }})</small>
+                      </div>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+</div>
+
+
+
+<script>
+  const pieCtx = document.getElementById('expensePieChart').getContext('2d');
+  new Chart(pieCtx, {
+    type: 'pie',
+    data: {
+      labels: {{ pie_labels|safe }},
+      datasets: [{
+        label: '支出比例',
+        data: {{ pie_data|safe }},
+        backgroundColor: [
+          '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c',
+          '#ffadad', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff'
+        ],
+        borderWidth: 1
+      }]
+    }
+  });
+
+  const barCtx = document.getElementById('monthlyBarChart').getContext('2d');
+  new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: {{ month_labels|safe }},
+      datasets: [
+        {
+          label: '收入',
+          data: {{ month_income|safe }},
+          backgroundColor: 'rgba(75, 192, 192, 0.7)'
+        },
+        {
+          label: '支出',
+          data: {{ month_expense|safe }},
+          backgroundColor: 'rgba(255, 99, 132, 0.7)'
+        },
+        {
+          label: '結餘',
+          data: {{ monthly_balance|safe }},
+          type: 'line',
+          borderColor: 'rgba(228, 141, 73, 1)',
+          backgroundColor: 'rgba(228, 141, 73, 1)',
+          fill: false,
+          tension: 0.3,
+          pointRadius: 3,
+          pointHoverRadius: 7,
+          yAxisID: 'y',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      stacked: false,
+      plugins: {
+        title: {
+          display: true,
+          text: '月收入 / 支出 / 結餘 比較圖'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

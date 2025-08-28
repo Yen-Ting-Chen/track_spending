@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+  .tag-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .category-tag {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 20px;
+    padding: 8px 16px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .category-tag span {
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  .category-tag form {
+    margin: 0;
+  }
+  .category-tag button {
+    font-size: 14px;
+    padding: 0 8px;
+  }
+</style>
+
+<div class="container mt-5">
+  <div class="row mb-4">
+    <div class="col text-center">
+      <h3 class="fw-bold text-primary">分類管理</h3>
+    </div>
+  </div>
+
+  <!-- 新增分類 -->
+  <div class="row mb-4">
+    <div class="col-md-6 mx-auto">
+      <form method="post" class="input-group shadow-sm">
+        {% csrf_token %}
+        <input type="text" name="name" class="form-control" placeholder="輸入新分類..." required>
+        <button type="submit" class="btn btn-outline-primary">新增</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 分類列表 -->
+  <div class="row">
+    <div class="col-md-10 mx-auto">
+      <div class="tag-box">
+        {% for category in categories %}
+        <div class="category-tag">
+          <span>{{ category.name }}</span>
+          <form method="post" action="{% url 'delete_category' category.id %}" onsubmit="return confirm('確定刪除分類：{{ category.name }}？');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger">✕</button>
+          </form>
+        </div>
+        {% empty %}
+        <p class="text-muted">尚未建立任何分類</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
